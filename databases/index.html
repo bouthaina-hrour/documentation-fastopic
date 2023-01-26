@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://example.com/databases/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>databases - Fastopic-documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "databases";
+        var mkdocs_page_input_path = "databases.md";
+        var mkdocs_page_url = "/databases/";
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Fastopic-documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../userGuide/">userGuide</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../gateway/">gateway</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">databases</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../msgBus/">messageBus</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../microservices/">microservices</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Fastopic-documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>databases</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="mongodb">mongodb</h1>
+<p>label minikube node : </p>
+<pre><code class="language-bash">kubectl label nodes minikube size=large
+</code></pre>
+<pre><code class="language-bash">cd manifests/mongodb
+</code></pre>
+<p>create stotage class : </p>
+<pre><code class="language-bash">kubectl apply -f storage-class.yaml
+</code></pre>
+<p>create secrets (username and password of database): </p>
+<pre><code class="language-bash">kubectl apply -f secrets.yaml
+</code></pre>
+<p>create pv and pvc with <strong>nfs</strong> : </p>
+<ul>
+<li>create the shared folder :</li>
+</ul>
+<pre><code class="language-bash">sudo mkdir -p /srv/nfsshare
+</code></pre>
+<ul>
+<li>Assign server access to client(s) through NFS export file: </li>
+</ul>
+<pre><code class="language-bash">sudo nano /etc/exports
+</code></pre>
+<ul>
+<li>add this rule </li>
+</ul>
+<pre><code class="language-bash"> /srv/nfsshare *(rw,sync,no_subtree_check,no_root_squash,insecure)
+</code></pre>
+<pre><code class="language-bash">exportfs -ra
+</code></pre>
+<ul>
+<li>enable a firewall for minikube to acess nfs : </li>
+</ul>
+<pre><code class="language-bash"> sudo ufw allow from &lt;minikube_ip&gt; to any port nfs
+</code></pre>
+<ul>
+<li>to mount the shared folder to a folder in minikube cluster : </li>
+</ul>
+<pre><code class="language-bash"> mount -t nfs &lt;nfs_adress_ip&gt;:/srv/nfsshare /mnt
+</code></pre>
+<ul>
+<li>to unmount a directory : </li>
+</ul>
+<pre><code class="language-bash"> sudo umount sharedfolder_client
+</code></pre>
+<p>pv  &amp;&amp;  pvc: </p>
+<pre><code class="language-bash"> kubectl apply -f persistent-volumes.yaml
+</code></pre>
+<pre><code class="language-bash"> kubectl apply -f persistent-volumes.yaml
+</code></pre>
+<p>if you need a mongo client to populate the database: </p>
+<pre><code class="language-bash"> kubectl apply -f mongodb-client.yaml
+</code></pre>
+<p>check file <strong>mongo-init.js</strong> to find the command to add a user.</p>
+<h1 id="neo4j">neo4j</h1>
+<pre><code class="language-bash"> helm repo add neo4j https://helm.neo4j.com/neo4j
+</code></pre>
+<pre><code class="language-bash"> helm repo update
+</code></pre>
+<p>After creating <strong>value.yaml</strong> with all configurations needed: </p>
+<pre><code class="language-bash"> cd manifests/neo4j
+</code></pre>
+<pre><code class="language-bash"> helm install &lt;my-neo4j-release&gt; neo4j/neo4j-standalone -f value.yaml
+</code></pre>
+<p>verify : </p>
+<pre><code class="language-bash">     kubectl get statefulsets
+
+</code></pre>
+<pre><code class="language-bash"> kubectl exec my-neo4j-release-0 -- tail -n50 /logs/neo4j.log
+</code></pre>
+<p>load dumps into the second database:</p>
+<ul>
+<li>
+<p>create a pod like done before</p>
+</li>
+<li>
+<p>Put the Neo4j instance in offline mode</p>
+<ul>
+<li>ensure that  <strong>offlineMaintenanceModeEnabled: true</strong> is added to your file yaml to the neo4j object</li>
+<li>install with helm</li>
+</ul>
+</li>
+<li>
+<p>copy dumps file into the pod</p>
+</li>
+</ul>
+<pre><code class="language-bash"> kubectl cp neo4j.dump &lt;pod_name&gt;:neo4j.dump
+</code></pre>
+<pre><code class="language-bash"> kubectl cp system.dump &lt;pod_name&gt;:system.dump
+</code></pre>
+<ul>
+<li>go inside the pod  </li>
+</ul>
+<pre><code class="language-bash"> kubectl exec -it &lt;pod_name&gt; /bin/bash
+</code></pre>
+<ul>
+<li>load </li>
+</ul>
+<pre><code class="language-bash"> neo4j-admin load --expand-commands --database=neo4j --from neo4j.dump
+</code></pre>
+<pre><code class="language-bash"> neo4j-admin load --expand-commands --database=system --from system.dump
+</code></pre>
+<ul>
+<li>put the Neo4j DBMS in online mode<ul>
+<li>ensure that  <strong>offlineMaintenanceModeEnabled: false</strong> is added to your file .yaml to the neo4j object</li>
+<li>upgrade with helm </li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-bash"> helm upgrade &lt;my-neo4j-release&gt; neo4j/neo4j-standalone -f value-wiki.yaml
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../gateway/" class="btn btn-neutral float-left" title="gateway"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../msgBus/" class="btn btn-neutral float-right" title="messageBus">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../gateway/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../msgBus/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
